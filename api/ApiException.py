@@ -3,11 +3,14 @@
 import traceback
 
 
-class EcxHandler:
+import ApiBase
+
+
+class ApiException(ApiBase):
 
     @staticmethod
     def exc_handler(function):
-        def wrapped(*args, **kwargs):
+        def wrapped(*args, **kwargs) -> function:
             # noinspection PyBroadException
             try:
                 return function(*args, **kwargs)
