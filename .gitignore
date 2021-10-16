@@ -1,3 +1,9 @@
 token.json
 /venv
 .idea/
+.log
+config/SysConf.py
+api/__pycache__/
+logs/
+__pycache__/
+/config/
