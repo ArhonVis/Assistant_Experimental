@@ -25,11 +25,10 @@ class UserException(Exception):
 class ApiException(UserException):
 
     def __init__(self):
-        _UserException__message: str
-        _UserException__code: int
-
-        self._UserException__message = "Something went wrong, the error was accepted for processing"
-        self._UserException__code = 7020
+        super().__init__(
+            code=7020,
+            message="Something went wrong, the error was accepted for processing"
+        )
 
     @staticmethod
     def get_filename(log_name: str) -> Path:
@@ -47,5 +46,4 @@ class ApiException(UserException):
                 with self.get_filename(str(log_name)).open(mode='a') as logfile:
                     traceback.print_exc(file=logfile)
                 return message
-
         return wrapped
