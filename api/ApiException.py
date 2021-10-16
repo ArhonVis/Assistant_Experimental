@@ -2,8 +2,12 @@
 
 import traceback
 
-
 import ApiBase
+
+
+class UserException(Exception):
+    def get_message(self):
+        pass
 
 
 class ApiException(ApiBase):
