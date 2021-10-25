@@ -4,7 +4,7 @@ import traceback
 import functools
 from pathlib import Path
 
-import ApiConfig
+from Assistant_Experimental.api import ApiConfig
 
 
 class UserException(Exception):
