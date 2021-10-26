@@ -1,18 +1,36 @@
 # api for telegram lib
-from typing import Dict, Callable, List, AnyStr, Tuple
 import re
-from telegram import Update
-from telegram.ext import Updater, CallbackContext, MessageHandler, Filters
+from typing import Dict, Any
+
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import Updater, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 
 from Assistant_Experimental.api.ApiException import ApiException, UserException
 
 CmdNotFound = UserException(code=404, message='Command not found')
 _ApiException = ApiException()
 
-Answer = List[AnyStr] or str
-Handler = Callable[[Update, CallbackContext], Answer]
-Format = Callable[[Answer], Answer]
-Routing = Dict[str, Tuple[Handler, Format] or Handler]
+Answer = Dict[str, Any]
+
+
+class BaseHandler:
+    SAMPLE = 0
+    DIALOG = 1
+
+    def __init__(self, type_handler: int = SAMPLE, have_but: bool = False):
+        self.type_handler = type_handler
+        self.have_but = have_but
+
+    def go(self, **kwargs) -> Answer:
+        """
+        This method will be call for handling
+        :return: {'text' : answer, 'reply_markup' = keyboard}
+        """
+        pass
+
+
+Handler = Any  # BaseHandler subclass
+Routing = Dict[str, Handler]
 
 
 class TeleBot:
@@ -20,24 +38,50 @@ class TeleBot:
     def __init__(self, token: str, routing: Routing) -> None:
         self.updater = Updater(token)
         self.routing = routing
+        self.have_def_but = False
+        self.__def_keyboards = None
+        self.updater.dispatcher.add_handler(CallbackQueryHandler(self.router))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.all, self.router))
 
     @_ApiException.exc_handler
     def router(self, update: Update, context: CallbackContext) -> None:
-        handler = self.routing.get(self.get_cmd(update.message.text))
-        if not handler:
-            update.message.reply_text(CmdNotFound.get_message())
-            assert CmdNotFound
-        handler, formatter = handler if isinstance(handler, tuple) else handler, self.format_default
-        res = handler(update, context)
-        update.message.reply_text(res)
-
-    @staticmethod
-    def format_default(data: Answer) -> Answer:
-        if isinstance(data, list):
-            return '\n'.join(data)
+        callback = update.callback_query
+        if callback:
+            cmd = callback.data
+            callback.answer()
+            method = callback.edit_message_text
         else:
-            return data
+            cmd = update.message.text
+            method = update.message.reply_text
+        cmd = self.get_cmd(cmd)
+        handler = self.routing.get(cmd)
+        if not handler:
+            method(CmdNotFound.get_message())
+            raise CmdNotFound
+        else:
+            params = {
+                'cmd': cmd}
+            res = handler.go(**params)
+        if not res.get('reply_markup') and self.have_def_but:
+            res.update({'reply_markup': self.__def_keyboards})
+        method(**res)
+
+    @_ApiException.exc_handler
+    def set_default_button(self, buttons_list: list):
+        def create_keyboard(buttons: list):
+            res = []
+            for but in buttons:
+                if isinstance(but, list):
+                    but_obj = create_keyboard(but)
+                else:
+                    name, value = but
+                    but_obj = InlineKeyboardButton(name, callback_data=value)
+                res += [but_obj]
+            return res
+
+        self.__def_keyboards = InlineKeyboardMarkup(create_keyboard(buttons_list))
+        self.have_def_but = True
+        return self.__def_keyboards
 
     @staticmethod
     def get_cmd(data: str) -> str:
@@ -48,17 +92,6 @@ class TeleBot:
             return data
 
     @_ApiException.exc_handler
-    def start(self):
+    def run(self):
         self.updater.start_polling()
         self.updater.idle()
-
-# A small example
-# from Assistant_Experimental.api import ApiConfig
-#
-#
-# def hello(update: Update, context: CallbackContext) -> Answer:
-#     return f'Hello {update.effective_user.first_name}'
-#
-#
-# bot = TeleBot(ApiConfig.Libraries['tele_bot']['token'], {'hello': hello})
-# bot.start()
