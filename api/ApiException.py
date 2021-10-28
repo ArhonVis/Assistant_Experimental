@@ -3,8 +3,10 @@
 import traceback
 import functools
 from pathlib import Path
+import sys
+sys.path.append(Path(__file__).parents[0].absolute())
 
-from Assistant_Experimental.api import ApiConfig
+from api import ApiConfig
 
 
 class UserException(Exception):

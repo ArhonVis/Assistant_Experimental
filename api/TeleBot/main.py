@@ -1,11 +1,13 @@
 # api for telegram lib
 import re
 from typing import Dict, Any
-
+from pathlib import Path
+import sys
+sys.path.append(Path(__file__).parents[1].absolute())
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Updater, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 
-from Assistant_Experimental.api.ApiException import ApiException, UserException
+from api.ApiException import ApiException, UserException
 
 CmdNotFound = UserException(code=404, message='Command not found')
 _ApiException = ApiException()
