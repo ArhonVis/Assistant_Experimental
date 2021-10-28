@@ -2,7 +2,12 @@ import requests
 import datetime
 import re
 from bs4 import BeautifulSoup
-from Assistant_Experimental.api import ApiConfig
+
+from pathlib import Path
+import sys
+sys.path.append(Path(__file__).parents[1].absolute())
+
+from api import ApiConfig
 
 
 def get_timetable_by_date(date1: str = "", date2: str = "", group: str = ""):
