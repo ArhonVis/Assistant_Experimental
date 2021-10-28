@@ -21,10 +21,13 @@ class TimeTable(BaseHandler):
             date1 = date1 + datetime.timedelta(days=-weekday) if weekday != 0 else date1
             delta = 6
         elif self.Tomorrow in cmd:
-            delta = 1
+            date1 = date1 + datetime.timedelta(days=1)
+            delta = 0
         else:
             delta = 0
         date2 = date1 + datetime.timedelta(days=delta)
+        date2 = date2.strftime("%Y-%m-%d")
+        date1 = date1.strftime("%Y-%m-%d")
         res = time_table_parser.get_timetable_by_date(date1=date1, date2=date2)
         return {'text': res}
 
