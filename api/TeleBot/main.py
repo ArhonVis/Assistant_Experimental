@@ -3,14 +3,14 @@ import re
 from typing import Dict, Any
 from pathlib import Path
 import sys
-sys.path.append(Path(__file__).parents[1].absolute())
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Updater, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 
+sys.path.append(Path(__file__).parents[1].absolute())
 from api.ApiException import ApiException, UserException
 
 CmdNotFound = UserException(code=404, message='Command not found')
-_ApiException = ApiException()
+exc_handler = ApiException().exc_handler
 
 Answer = Dict[str, Any]
 
@@ -45,7 +45,7 @@ class TeleBot:
         self.updater.dispatcher.add_handler(CallbackQueryHandler(self.router))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.all, self.router))
 
-    @_ApiException.exc_handler
+    @exc_handler
     def router(self, update: Update, context: CallbackContext) -> None:
         callback = update.callback_query
         if callback:
@@ -64,11 +64,13 @@ class TeleBot:
             params = {
                 'cmd': cmd}
             res = handler.go(**params)
+        if not isinstance(res, dict):
+            res = {'text': str(res)}
         if not res.get('reply_markup') and self.have_def_but:
             res.update({'reply_markup': self.__def_keyboards})
         method(**res)
 
-    @_ApiException.exc_handler
+    @exc_handler
     def set_default_button(self, buttons_list: list):
         def create_keyboard(buttons: list):
             res = []
@@ -93,7 +95,7 @@ class TeleBot:
         else:
             return data
 
-    @_ApiException.exc_handler
+    @exc_handler
     def run(self):
         self.updater.start_polling()
         self.updater.idle()
