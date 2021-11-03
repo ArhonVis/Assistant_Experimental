@@ -4,21 +4,28 @@ from api.TeleBot.main import TeleBot, BaseHandler
 from api.TeleBot.main import Answer
 
 from api import ApiConfig
+from api.ApiException import ApiException
 from helpers import time_table_parser
+
+exc_handler = ApiException().exc_handler
 
 
 class TimeTable(BaseHandler):
-    Week = 'Week'
+    CurrWeek = 'CurrentWeek'
+    NextWeek = 'NextWeek'
     Today = 'Today'
     Tomorrow = 'Tomorrow'
 
+    @exc_handler
     def go(self, **params) -> Answer:
         cmd: str = params['cmd']
         date1 = datetime.date.today()
         weekday = date1.weekday()
-        date1 = date1 + datetime.timedelta(days=1) if weekday == 6 else date1
-        if self.Week in cmd:
+        if self.CurrWeek in cmd:
             date1 = date1 + datetime.timedelta(days=-weekday) if weekday != 0 else date1
+            delta = 6
+        elif self.NextWeek in cmd:
+            date1 = date1 + datetime.timedelta(days=7-weekday)
             delta = 6
         elif self.Tomorrow in cmd:
             date1 = date1 + datetime.timedelta(days=1)
@@ -33,6 +40,8 @@ class TimeTable(BaseHandler):
 
 
 class Hello(BaseHandler):
+
+    @exc_handler
     def go(self, **params):
         return {'text': "Hello!"}
 
@@ -43,8 +52,10 @@ timetable = TimeTable()
 routs = {
     'timetableToday': timetable,
     'timetableTomorrow': timetable,
-    'timetableWeek': timetable,
-    'hello': hello
+    'timetableCurrentWeek': timetable,
+    'timetableNextWeek': timetable,
+    'hello': hello,
+    'start': hello
 }
 bot = TeleBot(ApiConfig.Libraries['tele_bot']['token'], routs)
 keyboard = [
@@ -52,7 +63,10 @@ keyboard = [
         ("На сегодня", '/timetableToday'),
         ("На завтра", '/timetableTomorrow'),
     ],
-    [("На неделю", '/timetableWeek')],
+    [
+        ("На неделю", '/timetableCurrentWeek'),
+        ("На след. неделю", '/timetableNextWeek')
+     ],
 ]
 bot.set_default_button(keyboard)
 bot.run()
