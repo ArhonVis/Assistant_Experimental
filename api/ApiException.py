@@ -56,11 +56,15 @@ class ApiException(UserException):
                 message = e.get_message() if isinstance(e, UserException) else self.get_message()
                 log_name = e.get_code() if isinstance(e, UserException) else self.get_code()
                 with self.get_filename(str(log_name)).open(mode='a') as logfile:
+                    now = datetime.datetime.now()
+                    logfile.write(f'{now}\n')
                     traceback.print_exc(file=logfile)
                     context_vars = ''''''
                     for key, value in inspect.trace()[-1][0].f_locals.items():
                         context_vars += f'{key} = {value}\n'
                     logfile.write(context_vars)
+                    logfile.write('-'*100)
+                    logfile.write('\n')
                 return message
 
         return wrapped
