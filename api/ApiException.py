@@ -2,8 +2,11 @@
 
 import traceback
 import functools
+import datetime
+import inspect
 from pathlib import Path
 import sys
+
 sys.path.append(Path(__file__).parents[0].absolute())
 
 from api import ApiConfig
@@ -33,8 +36,15 @@ class ApiException(UserException):
         )
 
     @staticmethod
-    def get_filename(log_name: str) -> Path:
-        return Path(ApiConfig.System['log_dir'] / Path(log_name))
+    def check_dir(dir_path: Path) -> Path:
+        if not dir_path.is_dir():
+            Path.mkdir(dir_path)
+        return dir_path
+
+    def get_filename(self, log_name: str) -> Path:
+        date = datetime.datetime.strftime(datetime.datetime.today(), "%Y-%m-%d")
+        log_dir = self.check_dir(Path(ApiConfig.System['log_dir'] / Path(date)))
+        return Path(log_dir / Path(log_name))
 
     def exc_handler(self, fn):
         @functools.wraps(fn)
@@ -47,5 +57,10 @@ class ApiException(UserException):
                 log_name = e.get_code() if isinstance(e, UserException) else self.get_code()
                 with self.get_filename(str(log_name)).open(mode='a') as logfile:
                     traceback.print_exc(file=logfile)
+                    context_vars = ''''''
+                    for key, value in inspect.trace()[-1][0].f_locals.items():
+                        context_vars += f'{key} = {value}\n'
+                    logfile.write(context_vars)
                 return message
+
         return wrapped
