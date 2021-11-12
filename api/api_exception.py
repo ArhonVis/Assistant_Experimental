@@ -9,7 +9,7 @@ import sys
 
 sys.path.append(Path(__file__).parents[0].absolute())
 
-from api import ApiConfig
+from api import api_config
 
 
 class UserException(Exception):
@@ -43,7 +43,7 @@ class ApiException(UserException):
 
     def get_filename(self, log_name: str) -> Path:
         date = datetime.datetime.strftime(datetime.datetime.today(), "%Y-%m-%d")
-        log_dir = self.check_dir(Path(ApiConfig.System['log_dir'] / Path(date)))
+        log_dir = self.check_dir(Path(api_config.System['log_dir'] / Path(date)))
         return Path(log_dir / Path(log_name))
 
     def exc_handler(self, fn):

@@ -7,7 +7,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Updater, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 
 sys.path.append(Path(__file__).parents[1].absolute())
-from api.ApiException import ApiException, UserException
+from api.api_exception import ApiException, UserException
 
 CmdNotFound = UserException(code=404, message='Command not found')
 exc_handler = ApiException().exc_handler

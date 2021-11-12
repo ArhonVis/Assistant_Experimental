@@ -7,13 +7,13 @@ from pathlib import Path
 import sys
 sys.path.append(Path(__file__).parents[1].absolute())
 
-from api import ApiConfig
+from api import api_config
 
 
 def get_timetable_by_date(date1: str = "", date2: str = "", group: str = ""):
     date1 = date1 if date1 else datetime.datetime.strftime(datetime.date.today(), "%Y-%m-%d")
     date2 = date2 if date2 else date1
-    config = ApiConfig.Helpers['parser']
+    config = api_config.Helpers['parser']
     url = config['url'] % {
         'year': config['year_default'],
         'semester': config['semester_default'],

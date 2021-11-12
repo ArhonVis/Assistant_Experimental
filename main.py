@@ -1,10 +1,10 @@
 import datetime
 
-from api.TeleBot.main import TeleBot, BaseHandler
-from api.TeleBot.main import Answer
+from api.tele_bot.main import TeleBot, BaseHandler
+from api.tele_bot.main import Answer
 
-from api import ApiConfig
-from api.ApiException import ApiException
+from api import api_config
+from api.api_exception import ApiException
 from helpers import time_table_parser
 
 exc_handler = ApiException().exc_handler
@@ -57,7 +57,7 @@ routs = {
     'hello': hello,
     'start': hello
 }
-bot = TeleBot(ApiConfig.Libraries['tele_bot']['token'], routs)
+bot = TeleBot(api_config.Libraries['tele_bot']['token'], routs)
 keyboard = [
     [
         ("На сегодня", '/timetableToday'),
