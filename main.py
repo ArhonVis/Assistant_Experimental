@@ -24,6 +24,7 @@ class TimeTable(BaseHandler):
         if self.CurrWeek in cmd:
             date1 = date1 + datetime.timedelta(days=-weekday) if weekday != 0 else date1
             delta = 6
+            raise 2/0
         elif self.NextWeek in cmd:
             date1 = date1 + datetime.timedelta(days=7-weekday)
             delta = 6

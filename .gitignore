@@ -7,3 +7,4 @@ api/__pycache__/
 logs/
 __pycache__/
 /config/
+/db

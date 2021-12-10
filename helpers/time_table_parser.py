@@ -36,6 +36,7 @@ def get_timetable_by_date(date1: str = "", date2: str = "", group: str = ""):
                 data[date] = [summary]
             else:
                 data[date] += list(map(lambda x: x.text, row.find_all('td')))
+        print(data)
         data = {day: '\n'.join(values) for day, values in data.items()}
         res = ""
         for day, lessons in data.items():
